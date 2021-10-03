@@ -1,11 +1,12 @@
-package com.slavamashkov.multithreading.lockBank;
+package com.slavamashkov.multithreading.raceBank;
 
+import java.text.DecimalFormat;
 import java.util.*;
 
 /**
  * A bank with a number of bank accounts that uses synchronization primitives.
  */
-public class SyncBank {
+public class SyncBank implements Bank{
     private final double[] accounts;
 
     /**
@@ -26,8 +27,7 @@ public class SyncBank {
      * @param to     the account to transfer to
      * @param amount the amount to transfer
      */
-    public synchronized void transfer(int from, int to, double amount)
-            throws InterruptedException {
+    public synchronized void transfer(int from, int to, double amount) throws InterruptedException {
         while (accounts[from] < amount) {
             wait();
         }
@@ -37,6 +37,7 @@ public class SyncBank {
         System.out.printf(" %10.2f from %d to %d", amount, from, to);
         accounts[to] += amount;
         System.out.printf(" Total Balance: %10.2f%n", getTotalBalance());
+
         notifyAll();
     }
 
@@ -61,5 +62,15 @@ public class SyncBank {
      */
     public int size() {
         return accounts.length;
+    }
+
+    public void getBalanceOfAcc(int from, int to) {
+        DecimalFormat df = new DecimalFormat("#.##");
+
+        double fromAmount = accounts[from];
+        double toAmount = accounts[to];
+
+        System.out.println("From-acc: " + df.format(fromAmount));
+        System.out.println("To-acc: " + df.format(toAmount));
     }
 }
