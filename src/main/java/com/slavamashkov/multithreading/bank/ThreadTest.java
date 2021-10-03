@@ -27,7 +27,12 @@ public class ThreadTest {
             } catch (InterruptedException ignored) {}
         };
 
-        new Thread(task1).start();
-        new Thread(task2).start();
+        Thread t1 = new Thread(task1);
+        t1.setName("Task 1");
+        t1.start();
+
+        Thread t2 = new Thread(task2);
+        t2.setName("Task 2");
+        t2.start();
     }
 }

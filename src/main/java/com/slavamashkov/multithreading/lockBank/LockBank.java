@@ -1,11 +1,15 @@
-package com.slavamashkov.multithreading.bank;
+package com.slavamashkov.multithreading.lockBank;
 
-import java.math.RoundingMode;
-import java.text.DecimalFormat;
-import java.util.Arrays;
+import java.util.*;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
-public class Bank {
+/**
+ * A bank with a number of bank accounts that uses Lock class
+ */
+public class LockBank {
     private final double[] accounts;
+    private Lock bankLock = new ReentrantLock();
 
     /**
      * Constructs the bank.
@@ -13,7 +17,7 @@ public class Bank {
      * @param n              the number of accounts
      * @param initialBalance the initial balance for each account
      */
-    public Bank(int n, double initialBalance) {
+    public LockBank(int n, double initialBalance) {
         accounts = new double[n];
         Arrays.fill(accounts, initialBalance);
     }
@@ -26,13 +30,16 @@ public class Bank {
      * @param amount the amount to transfer
      */
     public void transfer(int from, int to, double amount) {
-        if (accounts[from] < amount) return;
-        System.out.print(Thread.currentThread());
-        accounts[from] -= amount;
-        System.out.printf(" %10.2f from %d to %d", amount, from, to);
-        accounts[to] += amount;
-        System.out.printf(" Total Balance: %10.2f%n", getTotalBalance());
-        getBalanceOfAcc(from, to);
+        bankLock.lock();
+        try {
+            System.out.print(Thread.currentThread());
+            accounts[from] -= amount;
+            System.out.printf(" %10.2f from %d to %d", amount, from, to);
+            accounts[to] += amount;
+            System.out.printf(" Total Balance: %10.2f%n", getTotalBalance());
+        } finally {
+            bankLock.unlock();
+        }
     }
 
     /**
@@ -40,23 +47,13 @@ public class Bank {
      *
      * @return the total balance
      */
-    public double getTotalBalance() {
+    public synchronized double getTotalBalance() {
         double sum = 0;
 
         for (double a : accounts)
             sum += a;
 
         return sum;
-    }
-
-    public void getBalanceOfAcc(int from, int to) {
-        DecimalFormat df = new DecimalFormat("#.##");
-
-        double fromAmount = accounts[from];
-        double toAmount = accounts[to];
-
-        System.out.println("From-acc: " + df.format(fromAmount));
-        System.out.println("To-acc: " + df.format(toAmount));
     }
 
     /**
