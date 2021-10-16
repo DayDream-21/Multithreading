@@ -11,11 +11,6 @@ public class ArrayTest {
             for (int i = 0; i < 20; i++) {
                 System.out.println("[ " + Thread.currentThread().getName() + " ]");
                 integerList.add(random.nextInt(5)); // random number from 0 to 5
-                try {
-                    Thread.sleep(500);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
             }
         };
 
@@ -23,11 +18,6 @@ public class ArrayTest {
             for (int i = 0; i < 20; i++) {
                 System.out.println("[ " + Thread.currentThread().getName() + " ]");
                 integerList.add(random.nextInt(10-5) + 5); // random number from 5 to 10
-                try {
-                    Thread.sleep(500);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
             }
         };
 
@@ -44,11 +34,6 @@ public class ArrayTest {
             while (writerThread1.isAlive() || writerThread2.isAlive()) {
                 System.out.println("[ " + Thread.currentThread().getName() + " ]");
                 System.out.println(integerList);
-                try {
-                    Thread.sleep(500);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
             }
         };
 
