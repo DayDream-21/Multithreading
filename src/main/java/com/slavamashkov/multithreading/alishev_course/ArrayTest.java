@@ -10,7 +10,7 @@ public class ArrayTest {
         Runnable writer1 = () -> {
             for (int i = 0; i < 20; i++) {
                 System.out.println("[ " + Thread.currentThread().getName() + " ]");
-                integerList.add(random.nextInt(5));
+                integerList.add(random.nextInt(5)); // random number from 0 to 5
                 try {
                     Thread.sleep(500);
                 } catch (InterruptedException e) {
@@ -22,7 +22,7 @@ public class ArrayTest {
         Runnable writer2 = () -> {
             for (int i = 0; i < 20; i++) {
                 System.out.println("[ " + Thread.currentThread().getName() + " ]");
-                integerList.add(random.nextInt(10-5) + 5);
+                integerList.add(random.nextInt(10-5) + 5); // random number from 5 to 10
                 try {
                     Thread.sleep(500);
                 } catch (InterruptedException e) {
