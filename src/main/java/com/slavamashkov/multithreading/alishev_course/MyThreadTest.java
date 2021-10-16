@@ -4,8 +4,8 @@ import java.util.Random;
 
 public class MyThreadTest {
     public static void main(String[] args) {
-        MyThread myThread1 = new MyThread();
-        MyThread myThread2 = new MyThread();
+        MyThread myThread1 = new MyThread("First");
+        MyThread myThread2 = new MyThread("Second");
 
         myThread1.start();
         myThread2.start();
@@ -13,6 +13,10 @@ public class MyThreadTest {
 }
 
 class MyThread extends Thread {
+    public MyThread(String name) {
+        super(name);
+    }
+
     @Override
     public void run() {
         for (int i = 0; i < 100; i++) {
@@ -20,7 +24,7 @@ class MyThread extends Thread {
             try {
                 int time = random.nextInt(100);
                 Thread.sleep(time);
-                System.out.println("Hello from MyThread #" + i +
+                System.out.println("[" + currentThread().getName() + "]" +
                         " I'm going to sleep for " + time + "millis");
             } catch (InterruptedException e) {
                 e.printStackTrace();
