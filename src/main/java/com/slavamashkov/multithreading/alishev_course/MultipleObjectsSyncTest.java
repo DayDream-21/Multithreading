@@ -7,7 +7,7 @@ import java.util.Random;
 public class MultipleObjectsSyncTest {
     private int counter;
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws InterruptedException {
         new Worker().main();
     }
 }
@@ -15,27 +15,34 @@ public class MultipleObjectsSyncTest {
 class Worker {
     Random random = new Random();
 
+    final Object lock1 = new Object(); // Using this objects only
+    final Object lock2 = new Object(); // for multiple object sync
+
     private List<Integer> list1 = new ArrayList<>();
     private List<Integer> list2 = new ArrayList<>();
 
-    public void addToList1() {
-        try {
-            Thread.sleep(1);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+    public synchronized void addToList1() {
+        synchronized (lock1) {
+            try {
+                Thread.sleep(1);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
 
-        list1.add(random.nextInt(100));
+            list1.add(random.nextInt(100));
+        }
     }
 
-    public void addToList2() {
-        try {
-            Thread.sleep(1);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+    public synchronized void addToList2() {
+        synchronized (lock2) {
+            try {
+                Thread.sleep(1);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
 
-        list2.add(random.nextInt(100));
+            list2.add(random.nextInt(100));
+        }
     }
 
     public void work() {
@@ -45,10 +52,18 @@ class Worker {
         }
     }
 
-    public void main() {
+    public void main() throws InterruptedException {
         long before = System.currentTimeMillis();
 
-        work();
+        Thread thread1 = new Thread(this::work);
+
+        Thread thread2 = new Thread(this::work);
+
+        thread1.start();
+        thread2.start();
+
+        thread1.join();
+        thread2.join();
 
         long after = System.currentTimeMillis();
 
