@@ -1,8 +1,9 @@
 package com.slavamashkov.multithreading.alishev_course;
 
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class SynchronizedTest {
-    private int counter;
+    private AtomicInteger counter = new AtomicInteger(0);
 
     public static void main(String[] args) throws InterruptedException {
         SynchronizedTest test = new SynchronizedTest();
@@ -12,13 +13,13 @@ public class SynchronizedTest {
     public void doWork() throws InterruptedException {
         Thread thread1 = new Thread(() -> {
             for (int i = 0; i < 10000; i++) {
-                increment();
+                counter.incrementAndGet();
             }
         });
 
         Thread thread2 = new Thread(() -> {
             for (int i = 0; i < 10000; i++) {
-                increment();
+                counter.incrementAndGet();
             }
         });
 
@@ -29,9 +30,5 @@ public class SynchronizedTest {
         thread2.join(); // Wait till thread2 ends its work
 
         System.out.println(counter);
-    }
-
-    public synchronized void increment() {
-        this.counter++;
     }
 }
