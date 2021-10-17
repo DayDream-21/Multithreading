@@ -1,18 +1,17 @@
 package com.slavamashkov.multithreading.alishev_course;
 
-import java.util.Random;
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.BlockingQueue;
+import java.util.LinkedList;
+import java.util.Queue;
 
 public class ProducerConsumerTest {
-    private static BlockingQueue<Integer> integersQueue = new ArrayBlockingQueue<>(10);
-
     public static void main(String[] args) throws InterruptedException {
+        ProducerConsumer pc = new ProducerConsumer();
+
         Thread producerThread = new Thread(() -> {
             Thread.currentThread().setName("ProducerThread");
 
             try {
-                produce();
+                pc.produce();
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
@@ -22,7 +21,7 @@ public class ProducerConsumerTest {
             Thread.currentThread().setName("ConsumerThread");
 
             try {
-                consume();
+                pc.consume();
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
@@ -34,27 +33,42 @@ public class ProducerConsumerTest {
         producerThread.join();
         consumerThread.join();
     }
+}
 
-    private static void produce() throws InterruptedException {
-        Random random = new Random();
+class ProducerConsumer {
+    private Queue<Integer> queue = new LinkedList<>();
+    private final int LIMIT = 10;
+    private final Object lock = new Object(); // Object for locking
+
+    public void produce() throws InterruptedException {
+        int value = 0;
 
         while (true) {
-            System.out.println("[ " + Thread.currentThread().getName() + " ] ");
-            integersQueue.put(random.nextInt(100));
+            synchronized (lock) {
+                while (queue.size() == LIMIT) {
+                    lock.wait();
+                }
+
+                queue.offer(value++); // Thread-unsafe method
+                lock.notify();
+            }
         }
     }
 
-    private static void consume() throws InterruptedException {
-        Random random = new Random();
-
+    public void consume() throws InterruptedException {
         while (true) {
-            System.out.println("[ " + Thread.currentThread().getName() + " ] ");
-            Thread.sleep(100);
+            synchronized (lock) {
+                while (queue.size() == 0) {
+                    lock.wait();
+                }
 
-            if (random.nextInt(10) == 5) {
-                System.out.println(integersQueue.take());
-                System.out.println("Queue size: " + integersQueue.size());
+                int value = queue.poll();
+                System.out.println(value);
+                System.out.println("Queue size: " + queue.size());
+                lock.notify();
             }
+
+            Thread.sleep(1000);
         }
     }
 }
