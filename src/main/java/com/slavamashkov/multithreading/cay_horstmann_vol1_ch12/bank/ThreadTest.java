@@ -1,4 +1,4 @@
-package com.slavamashkov.multithreading.bank;
+package com.slavamashkov.multithreading.cay_horstmann_vol1_ch12.bank;
 
 public class ThreadTest {
     public static final int DELAY = 10;

@@ -1,6 +1,5 @@
-package com.slavamashkov.multithreading.bank;
+package com.slavamashkov.multithreading.cay_horstmann_vol1_ch12.bank;
 
-import java.math.RoundingMode;
 import java.text.DecimalFormat;
 import java.util.Arrays;
 

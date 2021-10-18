@@ -1,4 +1,4 @@
-package com.slavamashkov.multithreading.raceBank;
+package com.slavamashkov.multithreading.cay_horstmann_vol1_ch12.raceBank;
 
 /**
  * This program shows how multiple threads can safely access a data structure,

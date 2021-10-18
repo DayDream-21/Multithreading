@@ -1,4 +1,4 @@
-package com.slavamashkov.multithreading.raceBank;
+package com.slavamashkov.multithreading.cay_horstmann_vol1_ch12.raceBank;
 
 public interface Bank {
     /**
