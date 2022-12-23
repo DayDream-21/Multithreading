@@ -3,23 +3,35 @@ package com.slavamashkov.multithreading.alishev_course;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class SynchronizedTest {
-    private AtomicInteger counter = new AtomicInteger(0);
+    private int counter = 0;
 
     public static void main(String[] args) throws InterruptedException {
         SynchronizedTest test = new SynchronizedTest();
         test.doWork();
     }
 
+    public synchronized void increment() {
+        setCounter(getCounter() + 1);
+    }
+
+    public int getCounter() {
+        return counter;
+    }
+
+    public void setCounter(int counter) {
+        this.counter = counter;
+    }
+
     public void doWork() throws InterruptedException {
         Thread thread1 = new Thread(() -> {
             for (int i = 0; i < 10000; i++) {
-                counter.incrementAndGet();
+                increment();
             }
         });
 
         Thread thread2 = new Thread(() -> {
             for (int i = 0; i < 10000; i++) {
-                counter.incrementAndGet();
+                increment();
             }
         });
 
