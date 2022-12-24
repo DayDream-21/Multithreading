@@ -5,6 +5,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class BestPriceTest {
     List<Shop> shops = List.of(
@@ -24,21 +25,40 @@ public class BestPriceTest {
     );
 
     public static void main(String[] args) {
-        long start = System.nanoTime();
+        /*long start = System.nanoTime();
         System.out.println(new BestPriceTest().findPricesFutures("iPhone100XS"));
         long duration = ((System.nanoTime() - start) / 1_000_000);
-        System.out.println("Done in " + duration + " msecs");
+        System.out.println("Done in " + duration + " msecs");*/
+
+        long start = System.nanoTime();
+        CompletableFuture[] futures = new BestPriceTest().findPricesStream("iPhone")
+                .map(f ->
+                        f.thenAccept(s ->
+                                System.out.println(s +
+                                        " (done in " +
+                                        ((System.nanoTime() - start) / 1_000_000) +
+                                        " msecs)"
+                                )
+                        )
+                )
+                .toArray(CompletableFuture[]::new);
+        CompletableFuture.allOf(futures).join();
+        System.out.println("All shops have now responded in " + ((System.nanoTime() - start) / 1_000_000) + " msecs");
     }
 
     public List<String> findPrices(String product) {
         return shops.stream()
-                .map(shop -> String.format("%s price is %.2f \n", shop.getName(), shop.getPrice(product)))
+                .map(shop -> shop.getPrice(product))
+                .map(Quote::parse)
+                .map(Discount::applyDiscount)
                 .collect(Collectors.toList());
     }
 
     public List<String> findPricesParallel(String product) {
         return shops.parallelStream()
-                .map(shop -> String.format("%s price is %.2f \n", shop.getName(), shop.getPrice(product)))
+                .map(shop -> shop.getPrice(product))
+                .map(Quote::parse)
+                .map(Discount::applyDiscount)
                 .collect(Collectors.toList());
     }
 
@@ -52,14 +72,39 @@ public class BestPriceTest {
         List<CompletableFuture<String>> pricesFutures =
                 shops.stream()
                         .map(shop -> CompletableFuture.supplyAsync(() ->
-                                        String.format("%s price is %.2f \n", shop.getName(), shop.getPrice(product)),
-                                        executor
+                                shop.getPrice(product),
+                                executor
+                            )
+                        )
+                        .map(future -> future.thenApply(Quote::parse))
+                        .map(future -> future.thenCompose(quote ->
+                                CompletableFuture.supplyAsync(() ->
+                                    Discount.applyDiscount(quote),
+                                    executor
                                 )
+                            )
                         )
                         .collect(Collectors.toList());
 
         return pricesFutures.stream()
                 .map(CompletableFuture::join)
                 .collect(Collectors.toList());
+    }
+
+    public Stream<CompletableFuture<String>> findPricesStream(String product) {
+        return shops.stream()
+                        .map(shop -> CompletableFuture.supplyAsync(() ->
+                                shop.getPrice(product),
+                                executor
+                            )
+                        )
+                        .map(future -> future.thenApply(Quote::parse))
+                        .map(future -> future.thenCompose(quote ->
+                                CompletableFuture.supplyAsync(() ->
+                                    Discount.applyDiscount(quote),
+                                    executor
+                                )
+                            )
+                        );
     }
 }
