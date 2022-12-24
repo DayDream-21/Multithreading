@@ -2,6 +2,8 @@ package com.slavamashkov.multithreading.completable_future_features;
 
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
 public class BestPriceTest {
@@ -40,11 +42,20 @@ public class BestPriceTest {
                 .collect(Collectors.toList());
     }
 
+    private final Executor executor = Executors.newFixedThreadPool(Math.min(shops.size(), 100), (Runnable r) -> {
+        Thread t = new Thread(r);
+        t.setDaemon(true);
+        return t;
+    });
+
     public List<String> findPricesFutures(String product) {
         List<CompletableFuture<String>> pricesFutures =
                 shops.stream()
-                        .map(shop -> CompletableFuture.supplyAsync(
-                                () -> String.format("%s price is %.2f \n", shop.getName(), shop.getPrice(product))))
+                        .map(shop -> CompletableFuture.supplyAsync(() ->
+                                        String.format("%s price is %.2f \n", shop.getName(), shop.getPrice(product)),
+                                        executor
+                                )
+                        )
                         .collect(Collectors.toList());
 
         return pricesFutures.stream()
